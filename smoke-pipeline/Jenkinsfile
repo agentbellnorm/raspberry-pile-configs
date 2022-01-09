@@ -1,0 +1,38 @@
+pipeline {
+    environment {
+      REGISTRY_CREDS = credentials('docker-registry-private')
+    }
+    agent {
+        kubernetes {
+            defaultContainer 'jnlp'
+        }
+    }
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello everyone! This is now running on a Kubernetes executor!'
+            }
+        }
+        stage('Check kubectl') {
+            steps{
+                withKubeConfig([credentialsId: 'rpile-kubeconfig']) {
+                    sh 'kubectl get namespace'
+                }
+            }
+        }
+        stage('Check docker registry') {
+            steps {
+                sh 'curl -k -X GET --basic -u $REGISTRY_CREDS http://docker-registry-service.docker-registry.svc.cluster.local:5000/v2/_catalog'
+            }
+        }
+        stage('Check javascript/node') {
+            steps {
+                sh '''
+                node -v
+                npm -v
+                yarn -v
+                '''
+            }
+        }
+    }
+}
