@@ -14,8 +14,8 @@ spec:
         app: jenkins-server
     spec:
       securityContext:
-            fsGroup: 1000
-            runAsUser: 1000
+        fsGroup: 1000
+        runAsUser: 1000
       serviceAccountName: jenkins-admin
       containers:
         - name: jenkins
@@ -41,4 +41,4 @@ spec:
       volumes:
         - name: jenkins-data
           persistentVolumeClaim:
-              claimName: jenkins-pvc
+            claimName: jenkins-pvc
