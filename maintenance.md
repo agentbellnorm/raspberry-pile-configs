@@ -41,3 +41,30 @@ kubectl -n <namespace> scale --replicas=0 deployment <deployment>
 kubectl -n skum-matrix scale --replicas=0 deployment matrix-synapse
 ```
 Then just scale it to 1 again.
+
+
+### Upgrade k3s
+https://docs.k3s.io/upgrades/manual
+
+#### On worker nodes
+
+e.g. node02
+
+Stop service (containers will still run):
+```sh
+sudo systemctl stop k3s-agent
+```
+
+Rerun install script:
+```
+curl -sfL https://get.k3s.io | K3S_NODE_NAME="node02" K3S_URL="https://controlplane:6443" K3S_TOKEN="<token>" sh -
+```
+
+#### On control plane
+```sh
+sudo systemctl stop k3s
+```
+
+```sh
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--token <token>" sh -s -
+```
