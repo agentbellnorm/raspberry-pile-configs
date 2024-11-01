@@ -15,3 +15,10 @@ https://longhorn.io/docs/1.7.2/deploy/upgrade/
 - apply the upgrade (e.g. kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.7.2/deploy/longhorn.yaml)
 - upgrade the engine image of all the volumes
  - can do for all volumes at the once.
+
+
+## Backups
+
+- get the access key and secret access key from aws, encode them with `pbpaste | base64`
+- update `s3-backup-secret.yaml`
+- apply with `kubectl -n longhorn-system apply -f s3-backup-secret.yaml`
