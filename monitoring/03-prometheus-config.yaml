@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+
+    scrape_configs:
+      - job_name: 'node-exporter'
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          # Use the Node Exporter port on each node
+          - source_labels: [__address__]
+            action: replace
+            regex: (.+):\d+
+            replacement: ${1}:9100
+            target_label: __address__
+      - job_name: 'kubernetes-nodes'
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          # Map Kubernetes node labels to Prometheus labels for filtering
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          # Map Kubernetes pod labels to Prometheus labels for filtering
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          # Only scrape pods that have the annotation prometheus.io/scrape: 'true'
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          # Use the annotation prometheus.io/path as the metrics path, if present
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          # Use the annotation prometheus.io/port for the metrics port, if present
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: (.+):\d+;(\d+)
+            replacement: ${1}:${2}
+            target_label: __address__
